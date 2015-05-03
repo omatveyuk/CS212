@@ -31,7 +31,7 @@ class FavoriteActorViewController : UITableViewController, ActorPickerViewContro
     // Mark: - Actions
     
     func addActor() {
-        let controller = self.storyboard!.instantiateViewControllerWithIdentifier("ActorPickerViewController") as ActorPickerViewController
+        let controller = self.storyboard!.instantiateViewControllerWithIdentifier("ActorPickerViewController") as! ActorPickerViewController
         
         controller.delegate = self
         
@@ -75,9 +75,36 @@ class FavoriteActorViewController : UITableViewController, ActorPickerViewContro
             // The saveContext method doesnot exist yet, you should write it
             saveContext()
             
-            self.actors.append(newActor)
+            self.actors.append(actor)
         }
     }
+    
+    
+    // MARK: - Core Data Helpers
+    
+    func saveContext() {
+        
+        var error: NSError? = nil
+        
+        context.save(&error)
+        
+        if let error = error {
+            println(error)
+            abort()
+        }
+    }
+    
+    
+    lazy var context: NSManagedObjectContext = {
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let mainContext = delegate.managedObjectContext!
+        
+        let newContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        
+        newContext.persistentStoreCoordinator = mainContext.persistentStoreCoordinator
+        
+        return newContext
+        }()
     
     // MARK: - Table View
     
@@ -89,7 +116,7 @@ class FavoriteActorViewController : UITableViewController, ActorPickerViewContro
         let actor = actors[indexPath.row]
         let CellIdentifier = "ActorCell"
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as ActorTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as! ActorTableViewCell
         
         cell.nameLabel!.text = actor.name
         cell.frameImageView.image = UIImage(named: "personFrame")
@@ -127,8 +154,9 @@ class FavoriteActorViewController : UITableViewController, ActorPickerViewContro
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let controller = storyboard!.instantiateViewControllerWithIdentifier("MovieListViewController") as MovieListViewController
+        let controller = storyboard!.instantiateViewControllerWithIdentifier("MovieListViewController") as! MovieListViewController
         
+        println(actors.count)
         controller.actor = actors[indexPath.row]
         
         self.navigationController!.pushViewController(controller, animated: true)
@@ -149,7 +177,7 @@ class FavoriteActorViewController : UITableViewController, ActorPickerViewContro
     
     var actorArrayURL: NSURL {
         let filename = "favoriteActorsArray"
-        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as NSURL
+        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as! NSURL
         
         return documentsDirectoryURL.URLByAppendingPathComponent(filename)
     }

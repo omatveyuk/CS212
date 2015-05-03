@@ -35,7 +35,7 @@ class ActorPickerViewController: UIViewController, UITableViewDelegate, UITableV
     // MARK: - Core Data Helpers
     
     lazy var context: NSManagedObjectContext = {
-        let delegate = UIApplication.sharedApplication().delegate as AppDelegate
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let mainContext = delegate.managedObjectContext!
         
         let newContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
@@ -128,7 +128,7 @@ class ActorPickerViewController: UIViewController, UITableViewDelegate, UITableV
         let CellReuseId = "ActorSearchCell"
         let actor = actors[indexPath.row]
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(CellReuseId) as UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(CellReuseId) as! UITableViewCell
         
         cell.textLabel!.text = actor.name
         

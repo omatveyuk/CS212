@@ -38,20 +38,30 @@ class MovieListViewController : UITableViewController {
                     
                     if let moviesDictionaries = JSONResult.valueForKey("cast") as? [[String : AnyObject]] {
                         
-                        // Parse the array of movies dictionaries
-                        var movies = moviesDictionaries.map() { (dictionary: [String : AnyObject]) -> Movie in
-                            let movie = Movie(dictionary: dictionary)
+                        
+                        
+                        self.context.performBlock() {
                             
-                            // We associate this movie with it's actor by appending it to the array
-                            // In core data we use the relationship. We set the movie's actor property
+                            var movie = Movie(context: self.context)
+                            movie.title = "Crazy horse"
+                            //movie.actor = self.actor
+                            
                             self.actor.movies.append(movie)
                             
-                            return movie
-                        }
-                        
-                        // Update the table on the main thread
-                        dispatch_async(dispatch_get_main_queue()) {
-                            self.tableView.reloadData()
+                            var set = NSOrderedSet()
+                            
+                            
+                            /*
+                            self.actor.movies = moviesDictionaries.map() {
+                                Movie(context: self.context, dictionary: $0)
+                            }
+                            
+                            
+                            // Reload the table on the main thread
+                            dispatch_async(dispatch_get_main_queue()) {
+                                self.tableView!.reloadData()
+                            }
+                            */
                         }
                     } else {
                         let error = NSError(domain: "Movie for Person Parsing. Cant find cast in \(JSONResult)", code: 0, userInfo: nil)
@@ -61,6 +71,20 @@ class MovieListViewController : UITableViewController {
             }
         }
     }
+    
+    
+    // MARK: - Core Data Helpers
+    
+    lazy var context: NSManagedObjectContext = {
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let mainContext = delegate.managedObjectContext!
+        
+        let newContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        
+        newContext.persistentStoreCoordinator = mainContext.persistentStoreCoordinator
+        
+        return newContext
+        }()
     
     
     // MARK: - Table View
@@ -79,7 +103,7 @@ class MovieListViewController : UITableViewController {
         let CellIdentifier = "MovieCell"
         var posterImage = UIImage(named: "posterPlaceHoldr")
         
-        let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as TaskCancelingTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as! TaskCancelingTableViewCell
         
         cell.textLabel!.text = movie.title
         cell.imageView!.image = nil

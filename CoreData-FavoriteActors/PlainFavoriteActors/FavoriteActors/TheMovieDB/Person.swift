@@ -43,8 +43,8 @@ class Person: NSManagedObject {
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        name = dictionary[Keys.Name] as String
-        id = dictionary[Keys.ID] as Int
+        name = dictionary[Keys.Name] as! String
+        id = dictionary[Keys.ID] as! Int
         imagePath = dictionary[Keys.ProfilePath] as? String
     }
     
